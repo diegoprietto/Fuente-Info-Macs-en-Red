@@ -51,6 +51,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -63,7 +64,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AccesoArchivos.cs" />
-    <Compile Include="Datos\ConfiguracionInicial.cs" />
+    <Compile Include="ControlWeb.cs" />
+    <Compile Include="Datos.cs" />
+    <Compile Include="Modelos\ConfiguracionInicial.cs" />
     <Compile Include="FPrincipal.cs">
       <SubType>Form</SubType>
     </Compile>

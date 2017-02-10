@@ -64,67 +64,35 @@ namespace FuenteMacs
             //Inicializar objeto que accede al control WebBrowser
             controlWeb = new ControlWeb(web);
 
+            //Actualizar frecuencia del reloj
+            reloj.Interval = Datos.configuracionInicial.frecuenciaMs;
+
             //Ir a página principal
             controlWeb.navegarHome();
+
+            //Iniciar reloj
+            reloj.Start();
         }
 
 
         //Navega desde la página principal hasta la de Estadísticas de Wireless
         private void btNavegarEstadisticas_Click(object sender, EventArgs e)
         {
-            try {
-                //Desactivar las notificaciones de error de JavaScript
-                web.ScriptErrorsSuppressed = true;
-
-                //Comenzar desde la página inicial
-                web.Navigate("192.168.1.1");
-
-                //Luego de completarse la carga de la página continuar con el logueo
-                controlWeb.accionWeb = AccionWeb.LoginRouter;
-            }
-            catch (Exception ex)
-            {
-                //Evitar un posible bucle infinito
-                controlWeb.accionWeb = AccionWeb.ninguna;
-
-                //Reintentar o mostrar mensaje de error y detener
-                ////btNavegarEstadisticas_Click(null, null);
-            }
+            //Iniciar navegación
+            controlWeb.iniciarNavegacion();
         }
 
 
         private void btObenerDatosWireless_Click(object sender, EventArgs e)
         {
-            try
-            {
-                List<String> lsMac = new List<string>();
+            //Intentar obtener lista de MACs
+            textBox1.Text = controlWeb.obtenerListaMac();
+        }
 
-                //Buscar el frame correspondiente donde se encuentra los botones a partir del name
-                HtmlWindowCollection frame = web.Document.Window.Frames;
-
-                //Buscar la tabla que contiene los datos de las estadísticas
-                HtmlElement tabla = frame[2].Document.GetElementsByTagName("TBODY")[1];
-
-                //Obtener las filas
-                HtmlElementCollection filas = tabla.GetElementsByTagName("tr");
-
-                //Recorrer las filas, excepto el primero q son los títulos, y obtener cada una de las MACs
-                for (int i = 1; i < filas.Count; i++)
-                {
-                    //Obtener la segunda columna, que es donde esta la MAC y añadir a la lista
-                    lsMac.Add(filas[i].GetElementsByTagName("td")[1].InnerText);
-                }
-
-                //Mostrar lista de MACs
-                String listaMostrar = string.Empty;
-                foreach (String mac in lsMac)
-                    listaMostrar += mac + Environment.NewLine;
-                MessageBox.Show(listaMostrar, "Listado de Macs");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Excepción: " + ex.Message);
-            }
+        private void reloj_Tick(object sender, EventArgs e)
+        {
+            //Intentar obtener lista de MACs
+            textBox1.Text = DateTime.Now.ToLongTimeString() + Environment.NewLine + controlWeb.obtenerListaMac();
         }
     }
 }

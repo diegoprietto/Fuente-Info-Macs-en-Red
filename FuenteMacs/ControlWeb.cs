@@ -21,7 +21,7 @@ namespace FuenteMacs
             _web = control;
         }
 
-        //Accede a la página principal, 
+        //Accede a la página principal
         public void navegarHome()
         {
             //Ir a IP del Router
@@ -98,6 +98,68 @@ namespace FuenteMacs
 
                 //Reintentar o mostrar mensaje de error y detener
                 ////btNavegarEstadisticas_Click(null, null);
+            }
+        }
+
+        //Inicia el ciclo para llegar a la vista buscada (Estadísticas)
+        public void iniciarNavegacion()
+        {
+            try
+            {
+                //Desactivar las notificaciones de error de JavaScript
+                _web.ScriptErrorsSuppressed = true;
+
+                //Comenzar desde la página inicial
+                _web.Navigate("192.168.1.1");
+
+                //Luego de completarse la carga de la página continuar con el logueo
+                accionWeb = FuenteMacs.FPrincipal.AccionWeb.LoginRouter;
+            }
+            catch (Exception ex)
+            {
+                //Evitar un posible bucle infinito
+                accionWeb = FuenteMacs.FPrincipal.AccionWeb.ninguna;
+
+                //Reintentar o mostrar mensaje de error y detener
+                ////btNavegarEstadisticas_Click(null, null);
+            }
+        }
+
+        //Intenta obtener la lista de MACs
+        public String obtenerListaMac()
+        {
+            try
+            {
+                List<String> lsMac = new List<string>();
+
+                //Buscar el frame correspondiente donde se encuentra los botones a partir del name
+                HtmlWindowCollection frame = _web.Document.Window.Frames;
+
+                //Buscar la tabla que contiene los datos de las estadísticas
+                HtmlElement tabla = frame[2].Document.GetElementsByTagName("TBODY")[1];
+
+                //Obtener las filas
+                HtmlElementCollection filas = tabla.GetElementsByTagName("tr");
+
+                //Recorrer las filas, excepto el primero q son los títulos, y obtener cada una de las MACs
+                for (int i = 1; i < filas.Count; i++)
+                {
+                    //Obtener la segunda columna, que es donde esta la MAC y añadir a la lista
+                    lsMac.Add(filas[i].GetElementsByTagName("td")[1].InnerText);
+                }
+
+                //Mostrar lista de MACs
+                String listaMostrar = string.Empty;
+                foreach (String mac in lsMac)
+                    listaMostrar += mac + Environment.NewLine;
+                ////MessageBox.Show(listaMostrar, "Listado de Macs");
+
+                return listaMostrar;
+            }
+            catch (Exception ex)
+            {
+                ////MessageBox.Show("Excepción: " + ex.Message);
+                return ex.Message;
             }
         }
 

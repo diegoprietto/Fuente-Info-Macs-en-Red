@@ -12,6 +12,9 @@ namespace FuenteMacs
     {
         //Referencia al control
         private WebBrowser _web;
+        //Número de veces que se reintenta en caso de error, antes de volver a comenzar el ciclo de navegar hasta la página de estatísticas
+        private int reintentos = Datos.cantidadReintentosAnteFallo;
+
 
         //Acción a realizar luego que se complete la carga del documento (DocumentCompleted)
         public FuenteMacs.FPrincipal.AccionWeb accionWeb = FuenteMacs.FPrincipal.AccionWeb.ninguna;
@@ -37,8 +40,8 @@ namespace FuenteMacs
             try
             {
                 //Llenar datos para loguearse
-                _web.Document.GetElementById("userName").SetAttribute("value", "dprsoft");
-                _web.Document.GetElementById("pcPassword").SetAttribute("value", "DPRSoft1289");
+                _web.Document.GetElementById("userName").SetAttribute("value", Datos.configuracionInicial.usuario);
+                _web.Document.GetElementById("pcPassword").SetAttribute("value", Datos.configuracionInicial.pass);
                 _web.Document.GetElementById("loginBtn").InvokeMember("click");
 
                 //Luego de completarse la carga de la página continuar con yendo al menú Wireless
@@ -49,8 +52,7 @@ namespace FuenteMacs
                 //Evitar un posible bucle infinito
                 accionWeb = FuenteMacs.FPrincipal.AccionWeb.ninguna;
 
-                //Reintentar
-                ////btNavegarEstadisticas_Click(null, null);
+                ControlLog.EscribirLog(ControlLog.TipoGravedad.WARNING, "ControlWeb.cs", "loginRouter", "Error de logueo del router: " + ex.Message);
             }
         }
 
@@ -73,8 +75,7 @@ namespace FuenteMacs
                 //Evitar un posible bucle infinito
                 accionWeb = FuenteMacs.FPrincipal.AccionWeb.ninguna;
 
-                //Reintentar
-                ////btNavegarEstadisticas_Click(null, null);
+                ControlLog.EscribirLog(ControlLog.TipoGravedad.WARNING, "ControlWeb.cs", "menuWireless", "Error al intentar acceder a la vista de Wireless: " + ex.Message);
             }
         }
 
@@ -96,8 +97,7 @@ namespace FuenteMacs
                 //Evitar un posible bucle infinito
                 accionWeb = FuenteMacs.FPrincipal.AccionWeb.ninguna;
 
-                //Reintentar o mostrar mensaje de error y detener
-                ////btNavegarEstadisticas_Click(null, null);
+                ControlLog.EscribirLog(ControlLog.TipoGravedad.WARNING, "ControlWeb.cs", "menuWirelessStatistics", "Error al intentar acceder a la vista de WirelessStatistics: " + ex.Message);
             }
         }
 
@@ -106,11 +106,8 @@ namespace FuenteMacs
         {
             try
             {
-                //Desactivar las notificaciones de error de JavaScript
-                _web.ScriptErrorsSuppressed = true;
-
                 //Comenzar desde la página inicial
-                _web.Navigate("192.168.1.1");
+                navegarHome();
 
                 //Luego de completarse la carga de la página continuar con el logueo
                 accionWeb = FuenteMacs.FPrincipal.AccionWeb.LoginRouter;
@@ -120,13 +117,12 @@ namespace FuenteMacs
                 //Evitar un posible bucle infinito
                 accionWeb = FuenteMacs.FPrincipal.AccionWeb.ninguna;
 
-                //Reintentar o mostrar mensaje de error y detener
-                ////btNavegarEstadisticas_Click(null, null);
+                ControlLog.EscribirLog(ControlLog.TipoGravedad.WARNING, "ControlWeb.cs", "iniciarNavegacion", "Error al intentar reiniciar la navegación web: " + ex.Message);
             }
         }
 
         //Intenta obtener la lista de MACs
-        public String obtenerListaMac()
+        public List<String> obtenerListaMac()
         {
             try
             {
@@ -148,18 +144,23 @@ namespace FuenteMacs
                     lsMac.Add(filas[i].GetElementsByTagName("td")[1].InnerText);
                 }
 
-                //Mostrar lista de MACs
-                String listaMostrar = string.Empty;
-                foreach (String mac in lsMac)
-                    listaMostrar += mac + Environment.NewLine;
-                ////MessageBox.Show(listaMostrar, "Listado de Macs");
+                //Reiniciar contador
+                reintentos = Datos.cantidadReintentosAnteFallo;
 
-                return listaMostrar;
+                return lsMac;
             }
             catch (Exception ex)
             {
-                ////MessageBox.Show("Excepción: " + ex.Message);
-                return ex.Message;
+                //Reducir el número de reintentos
+                reintentos--;
+                if (reintentos == 0) {
+                    //Volver a navegar desde el inicio, reiniciar contador
+                    reintentos = Datos.cantidadReintentosAnteFallo;
+                    iniciarNavegacion();
+                }
+
+                ControlLog.EscribirLog(ControlLog.TipoGravedad.WARNING, "ControlWeb.cs", "obtenerListaMac", "Error al intentar leer las direcciones Macs de la web: " + ex.Message);
+                return null;
             }
         }
 

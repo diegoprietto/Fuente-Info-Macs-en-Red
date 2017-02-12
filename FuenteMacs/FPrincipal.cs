@@ -17,7 +17,7 @@ namespace FuenteMacs
     {
         AccesoArchivos accesoArchivos = new AccesoArchivos();
         ControlWeb controlWeb;
-
+        MemoriaCompartida memoriaCompartida;
 
         
         //Enum
@@ -65,7 +65,16 @@ namespace FuenteMacs
             {
                 MessageBox.Show("No se pudo inicializar el control de Log: " + msjLog);
             }
-            
+
+            //Inicializar memoria compartida
+            memoriaCompartida = new MemoriaCompartida(Datos.nombreMemoriaCompartida, Datos.nombreMutexCompartido, Datos.capacidadMemoriaCompartida);
+            if (!memoriaCompartida.IniciarConexion(ref msjLog))
+            {
+                //Error
+                ControlLog.EscribirLog(ControlLog.TipoGravedad.WARNING, "FPrincipal.cs", "Form1_Load", "Error al inicializar la memoria compartida: " + msjLog);
+                MessageBox.Show("Error al inicializar la memoria compartida: " + msjLog);
+            }
+
             //Obtener datos de configuración del usuario
             Datos.configuracionInicial = accesoArchivos.CargarArchivoConfiguracionInicial(Datos.rutaArchivoConfiguracion);
 
@@ -98,22 +107,35 @@ namespace FuenteMacs
         {
             List<String> lsMac;
             List<MacDispositivo> lsObjMac;
+            String cadenaMemoria;
+            String msjLog = String.Empty;
 
             //Intentar obtener lista de MACs
             lsMac = controlWeb.obtenerListaMac();
 
-            //Mapear a objetos
-            lsObjMac = mapearObjetoMacDispositivo(lsMac);
-
-            //Actualizar ListBox
-            lsConectados.Items.Clear();
-            foreach (var item in lsObjMac)
+            if (lsMac != null)
             {
-                lsConectados.Items.Add(item);
+                //Mapear a objetos
+                lsObjMac = mapearObjetoMacDispositivo(lsMac);
+
+                //Actualizar ListBox
+                lsConectados.Items.Clear();
+                foreach (var item in lsObjMac)
+                {
+                    lsConectados.Items.Add(item);
+                }
+                //Cantidad de conectados y última actualización
+                lbCant.Text = lsConectados.Items.Count.ToString();
+                lbUltimaAct.Text = DateTime.Now.ToLongTimeString();
+
+                //Actualizar archivo en memoria
+                cadenaMemoria = String.Join("&", lsMac);    //Convertir a una sola cadena
+                if (!memoriaCompartida.EscribirEnMemoria(cadenaMemoria, ref msjLog))
+                {
+                    //Error
+                    ControlLog.EscribirLog(ControlLog.TipoGravedad.WARNING, "FPrincipal.cs", "btObenerDatosWireless_Click", "Error al actualizar la memoria compartida: " + msjLog);
+                }
             }
-            //Cantidad de conectados y última actualización
-            lbCant.Text = lsConectados.Items.Count.ToString();
-            lbUltimaAct.Text = DateTime.Now.ToLongTimeString();
         }
 
         private void reloj_Tick(object sender, EventArgs e)

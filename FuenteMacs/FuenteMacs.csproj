@@ -73,6 +73,7 @@
     <Compile Include="FConfigurar.Designer.cs">
       <DependentUpon>FConfigurar.cs</DependentUpon>
     </Compile>
+    <Compile Include="MemoriaCompartida.cs" />
     <Compile Include="Modelos\ConfiguracionInicial.cs" />
     <Compile Include="FPrincipal.cs">
       <SubType>Form</SubType>

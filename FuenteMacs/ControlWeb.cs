@@ -137,17 +137,37 @@ namespace FuenteMacs
                 //Obtener las filas
                 HtmlElementCollection filas = tabla.GetElementsByTagName("tr");
 
-                //Recorrer las filas, excepto el primero q son los títulos, y obtener cada una de las MACs
-                for (int i = 1; i < filas.Count; i++)
+                //Verificar que la tabla es correcta, verificando el título de la misma
+                if (filas[0].GetElementsByTagName("td")[1].InnerText == "MAC Address")
                 {
-                    //Obtener la segunda columna, que es donde esta la MAC y añadir a la lista
-                    lsMac.Add(filas[i].GetElementsByTagName("td")[1].InnerText);
+                    //Recorrer las filas, excepto el primero q son los títulos, y obtener cada una de las MACs
+                    for (int i = 1; i < filas.Count; i++)
+                    {
+                        //Obtener la segunda columna, que es donde esta la MAC y añadir a la lista
+                        lsMac.Add(filas[i].GetElementsByTagName("td")[1].InnerText);
+                    }
+
+                    //Reiniciar contador
+                    reintentos = Datos.cantidadReintentosAnteFallo;
+
+                    return lsMac;
                 }
+                else {
+                    //La vista no es la correcta, muy probablemente
 
-                //Reiniciar contador
-                reintentos = Datos.cantidadReintentosAnteFallo;
+                    //Reducir el número de reintentos
+                    reintentos--;
+                    if (reintentos == 0)
+                    {
+                        //Volver a navegar desde el inicio, reiniciar contador
+                        reintentos = Datos.cantidadReintentosAnteFallo;
+                        iniciarNavegacion();
+                    }
 
-                return lsMac;
+                    ControlLog.EscribirLog(ControlLog.TipoGravedad.WARNING, "ControlWeb.cs", "obtenerListaMac", "Error al intentar leer las direcciones Macs de la web, la tabla leida no es la correcta, título leido: " + filas[0].GetElementsByTagName("td")[1].InnerText);
+
+                    return null; 
+                }
             }
             catch (Exception ex)
             {

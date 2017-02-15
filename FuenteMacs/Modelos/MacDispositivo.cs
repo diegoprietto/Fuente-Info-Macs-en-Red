@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MongoDB.Bson;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,6 +12,7 @@ namespace FuenteMacs.Modelos
     {
         public string MAC;
         public string descripcion;
+        public ObjectId _id { get; set; }       //Necesario para usar Mongo
 
         public MacDispositivo(string MAC, string descripcion)
         {

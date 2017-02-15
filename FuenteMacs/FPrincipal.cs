@@ -10,16 +10,40 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Configuration;
 using FuenteMacs.Modelos;
+using System.Runtime.InteropServices;
 
 namespace FuenteMacs
 {
     public partial class FPrincipal : Form
     {
+        #region Bloque Código Silenciar WebBrowser
+        //Constantes
+        private const int FEATURE_DISABLE_NAVIGATION_SOUNDS = 21;
+        private const int SET_FEATURE_ON_THREAD = 0x00000001;
+        private const int SET_FEATURE_ON_PROCESS = 0x00000002;
+        private const int SET_FEATURE_IN_REGISTRY = 0x00000004;
+        private const int SET_FEATURE_ON_THREAD_LOCALMACHINE = 0x00000008;
+        private const int SET_FEATURE_ON_THREAD_INTRANET = 0x00000010;
+        private const int SET_FEATURE_ON_THREAD_TRUSTED = 0x00000020;
+        private const int SET_FEATURE_ON_THREAD_INTERNET = 0x00000040;
+        private const int SET_FEATURE_ON_THREAD_RESTRICTED = 0x00000080;
+
+        // Necessary dll import
+        [DllImport("urlmon.dll")]
+        [PreserveSig]
+        [return:MarshalAs(UnmanagedType.Error)]
+        static extern int CoInternetSetFeatureEnabled(
+        int FeatureEntry,
+        [MarshalAs(UnmanagedType.U4)] int dwFlags,
+        bool fEnable);
+
+        #endregion
+
         AccesoArchivos accesoArchivos = new AccesoArchivos();
         ControlWeb controlWeb;
         MemoriaCompartida memoriaCompartida;
+        ControlMongo controlMongo;
 
-        
         //Enum
         public enum AccionWeb
         {
@@ -58,6 +82,13 @@ namespace FuenteMacs
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            //Silenciar aplicación
+            try
+            {
+                CoInternetSetFeatureEnabled(FEATURE_DISABLE_NAVIGATION_SOUNDS, SET_FEATURE_ON_PROCESS, true);
+            }
+            catch (Exception) { }
+
             String msjLog;
             
             //Inicializar Log
@@ -73,6 +104,19 @@ namespace FuenteMacs
                 //Error
                 ControlLog.EscribirLog(ControlLog.TipoGravedad.WARNING, "FPrincipal.cs", "Form1_Load", "Error al inicializar la memoria compartida: " + msjLog);
                 MessageBox.Show("Error al inicializar la memoria compartida: " + msjLog);
+            }
+
+            //Inicalizar control de acceso a MongoDB
+            controlMongo = new ControlMongo(Datos.mongoUrlConexion,Datos.mongoNombreBaseDatos,Datos.mongoNombreColeccion);
+            try
+            {
+                controlMongo.inicializar();
+            }
+            catch (Exception ex)
+            {
+                //Error
+                ControlLog.EscribirLog(ControlLog.TipoGravedad.WARNING, "FPrincipal.cs", "Form1_Load", "Error al inicializar la conexión con la Base de Datos Mongo: " + ex.Message);
+                MessageBox.Show("Error al inicializar la conexión con la Base de Datos de Mongo " + ex.Message);
             }
 
             //Obtener datos de configuración del usuario
@@ -135,6 +179,24 @@ namespace FuenteMacs
                     //Error
                     ControlLog.EscribirLog(ControlLog.TipoGravedad.WARNING, "FPrincipal.cs", "btObenerDatosWireless_Click", "Error al actualizar la memoria compartida: " + msjLog);
                 }
+
+                //Actualizar Base de Datos MongoDB
+                ActualizarBaseDatosMongo(lsObjMac);
+            }
+        }
+
+        //Actualiza la colección para que muestre solo los dispositivos conectados, con la MAC y Descripción
+        private void ActualizarBaseDatosMongo(List<MacDispositivo> lsDispositivos)
+        {
+            try
+            {
+                controlMongo.eliminarColeccion();
+                controlMongo.InsertarMuchosDocumentos(lsDispositivos);
+            }
+            catch (Exception ex)
+            {
+                //Error
+                ControlLog.EscribirLog(ControlLog.TipoGravedad.WARNING, "FPrincipal.cs", "ActualizarBaseDatosMongo", "Error al intentar insertar documentos a la Base de Datos Mongo: " + ex.Message);
             }
         }
 

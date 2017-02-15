@@ -25,5 +25,9 @@ namespace FuenteMacs
         public static int cantidadReintentosAnteFallo = int.Parse(ConfigurationManager.AppSettings["cantidadReintentosAnteFallo"]);
         public static String leyendaMacSinDescripcion = ConfigurationManager.AppSettings["leyendaMacSinDescripcion"];
 
+        //Datos para la conexión a MongoDB
+        public static String mongoUrlConexion = ConfigurationManager.AppSettings["mongoUrlConexion"];
+        public static String mongoNombreBaseDatos = ConfigurationManager.AppSettings["mongoNombreBaseDatos"];
+        public static String mongoNombreColeccion = ConfigurationManager.AppSettings["mongoNombreColeccion"];
     }
 }

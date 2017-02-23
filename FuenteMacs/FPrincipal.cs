@@ -172,8 +172,10 @@ namespace FuenteMacs
                 lbCant.Text = lsConectados.Items.Count.ToString();
                 lbUltimaAct.Text = DateTime.Now.ToLongTimeString();
 
+                //Formatear para guardar en memoria
+                cadenaMemoria = FormatearCadenaParaMemoria(lsMac);
+
                 //Actualizar archivo en memoria
-                cadenaMemoria = String.Join("&", lsMac);    //Convertir a una sola cadena
                 if (!memoriaCompartida.EscribirEnMemoria(cadenaMemoria, ref msjLog))
                 {
                     //Error
@@ -183,6 +185,18 @@ namespace FuenteMacs
                 //Actualizar Base de Datos MongoDB
                 ActualizarBaseDatosMongo(lsObjMac);
             }
+        }
+
+        //Convertir a una sola cadena y agregar fecha
+        private String FormatearCadenaParaMemoria(List<String> listaMac)
+        {
+            String hora = DateTime.Now.ToString("yyyyMMddHHmmss");
+
+            //Si no hay items solo enviar la hora
+            if (listaMac.Count == 0)
+                return hora;
+            else
+                return (hora + "&" + String.Join("&", listaMac));
         }
 
         //Actualiza la colección para que muestre solo los dispositivos conectados, con la MAC y Descripción

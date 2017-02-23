@@ -48,7 +48,7 @@ namespace FuenteMacs
         {
             //Obtener colección
             var coleccionBD = _mongo.GetCollection<MacDispositivo>(_nombreColeccion);
-
+            
             _mongo.DropCollection(_nombreColeccion);
         }
 

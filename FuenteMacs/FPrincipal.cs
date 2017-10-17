@@ -183,7 +183,8 @@ namespace FuenteMacs
                 }
 
                 //Actualizar Base de Datos MongoDB
-                ActualizarBaseDatosMongo(lsObjMac);
+                if (chGuardarBD.Checked)
+                    ActualizarBaseDatosMongo(lsObjMac);
             }
         }
 
@@ -204,13 +205,25 @@ namespace FuenteMacs
         {
             try
             {
+                //Mostrar msj de BD
+                msjActualizandoBD.Visible = true;
+
                 controlMongo.eliminarColeccion();
                 controlMongo.InsertarMuchosDocumentos(lsDispositivos);
+
+                //Mostrar msj de BD
+                msjActualizandoBD.Visible = false;
             }
             catch (Exception ex)
             {
                 //Error
                 ControlLog.EscribirLog(ControlLog.TipoGravedad.WARNING, "FPrincipal.cs", "ActualizarBaseDatosMongo", "Error al intentar insertar documentos a la Base de Datos Mongo: " + ex.Message);
+
+                chGuardarBD.Checked = false;
+                MessageBox.Show("Error al intentar actualizar la BD, se va a desactivar la opción de mantener actualizado la Base de Datos.");
+
+                //Mostrar msj de BD
+                msjActualizandoBD.Visible = false;
             }
         }
 

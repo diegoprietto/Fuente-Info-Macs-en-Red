@@ -41,6 +41,8 @@
             this.label2 = new System.Windows.Forms.Label();
             this.lbUltimaAct = new System.Windows.Forms.Label();
             this.chPausar = new System.Windows.Forms.CheckBox();
+            this.chGuardarBD = new System.Windows.Forms.CheckBox();
+            this.msjActualizandoBD = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // web
@@ -143,11 +145,34 @@
             this.chPausar.UseVisualStyleBackColor = true;
             this.chPausar.CheckedChanged += new System.EventHandler(this.chPausar_CheckedChanged);
             // 
+            // chGuardarBD
+            // 
+            this.chGuardarBD.AutoSize = true;
+            this.chGuardarBD.Location = new System.Drawing.Point(845, 368);
+            this.chGuardarBD.Name = "chGuardarBD";
+            this.chGuardarBD.Size = new System.Drawing.Size(90, 17);
+            this.chGuardarBD.TabIndex = 28;
+            this.chGuardarBD.Text = "Actualizar BD";
+            this.chGuardarBD.UseVisualStyleBackColor = true;
+            // 
+            // msjActualizandoBD
+            // 
+            this.msjActualizandoBD.AutoSize = true;
+            this.msjActualizandoBD.ForeColor = System.Drawing.Color.Purple;
+            this.msjActualizandoBD.Location = new System.Drawing.Point(842, 400);
+            this.msjActualizandoBD.Name = "msjActualizandoBD";
+            this.msjActualizandoBD.Size = new System.Drawing.Size(95, 13);
+            this.msjActualizandoBD.TabIndex = 29;
+            this.msjActualizandoBD.Text = "Actualizando BD...";
+            this.msjActualizandoBD.Visible = false;
+            // 
             // FPrincipal
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1141, 577);
+            this.Controls.Add(this.msjActualizandoBD);
+            this.Controls.Add(this.chGuardarBD);
             this.Controls.Add(this.chPausar);
             this.Controls.Add(this.lbUltimaAct);
             this.Controls.Add(this.label2);
@@ -182,6 +207,8 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label lbUltimaAct;
         private System.Windows.Forms.CheckBox chPausar;
+        private System.Windows.Forms.CheckBox chGuardarBD;
+        private System.Windows.Forms.Label msjActualizandoBD;
     }
 }
 
